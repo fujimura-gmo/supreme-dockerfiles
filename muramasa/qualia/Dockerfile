@@ -1,4 +1,7 @@
 FROM centos
+MAINTAINER Arata Fujimura
+
+RUN echo 'LANG="ja_JP.UTF-8"' > /etc/sysconfig/i18n ;echo 'ZONE="Asia/Tokyo"' > /etc/sysconfig/clock ;cp -a /usr/share/zoneinfo/Asia/Tokyo /etc/localtime 
 
 ## FOr Web
 
@@ -33,10 +36,10 @@ RUN groupadd -g 600 mysql;useradd -g mysql -u 600 -d /home/mysql mysql;
 RUN cd /usr/local/src;wget http://www.percona.com/redir/downloads/Percona-Server-5.5/Percona-Server-5.5.29-29.4/binary/linux/x86_64/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;tar -zxf Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;mkdir -p /var/xtradb/tmp;mkdir -p /var/xtradb/files/qualia;mkdir -p /var/xtradb/logs/qualia;mkdir -p /var/xtradb/qualia;mkdir -p /usr/local/xtradb;mkdir -p /etc/xtradb/qualia;mv /usr/local/src/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64 /usr/local/xtradb/xtradb-5.5.29;chown -R mysql.mysql /var/xtradb /usr/local/xtradb /etc/xtradb;
 
 # For MySQL Config
-ADD share/mysql_files/my.cnf /etc/xtradb/qualia
-ADD share/mysql_files/mysql.conn /etc/xtradb/qualia
-ADD share/mysql_files/mysql.server /etc/xtradb/qualia
-RUN su - mysql;cd /usr/local/xtradb/xtradb-5.5.29;./scripts/mysql_install_db --datadir=/var/xtradb/qualia;
+ADD mysql_files/my.cnf /etc/xtradb/qualia
+ADD mysql_files/mysql.conn /etc/xtradb/qualia
+ADD mysql_files/mysql.server /etc/xtradb/qualia
 
 CMD /etc/xtradb/qualia/mysql.server start;
+CMD su - mysql;cd /usr/local/xtradb/xtradb-5.5.29;./scripts/mysql_install_db --datadir=/var/xtradb/qualia;
 
