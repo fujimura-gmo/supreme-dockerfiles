@@ -1,1 +1,9 @@
-# It is not open to the public.
+#!/bin/sh
+#-----------------------------------------------------
+BASEDIR="/usr/local/xtradb/xtradb-5.5.29"
+CONFDIR="/etc/xtradb/qualia"
+LOGIN="-uroot"
+#-----------------------------------------------------
+
+${BASEDIR}/bin/mysql --defaults-file=${CONFDIR}/my.cnf ${LOGIN}
+
