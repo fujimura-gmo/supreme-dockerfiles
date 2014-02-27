@@ -9,7 +9,7 @@ RUN echo 'LANG="ja_JP.UTF-8"' > /etc/sysconfig/i18n ;echo 'ZONE="Asia/Tokyo"' > 
 RUN cd /usr/local/src;wget http://ftp-srv2.kddilabs.jp/Linux/distributions/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm;rpm -ivh epel-release-6-8.noarch.rpm
 
 # For Package
-RUN yum groupinstall -y "Development Tools";yum --enablerepo=epel install -y zlib-devel openssl-devel libxml2-devel bzip2-devel curl-devel libpng-devel freetype-devel openldap-devel mysql-devel net-snmp-devel libxslt-devel libjpeg-devel libmcrypt-devel libevent-devel libmcrypt;
+RUN yum groupinstall -y "Development Tools";yum --enablerepo=epel install -y zlib-devel openssl-devel libxml2-devel bzip2-devel curl-devel libpng-devel freetype-devel openldap-devel mysql-devel net-snmp-devel libxslt-devel libjpeg-devel libmcrypt-devel libevent-devel libmcrypt sudo libaio libaio-devel;
 
 # For Apache
 RUN cd /usr/local/src;wget http://www.us.apache.org/dist/httpd/httpd-2.2.26.tar.gz;tar -zxf httpd-2.2.26.tar.gz;cd httpd-2.2.26;./configure --prefix=/usr/local/apache2 --enable-so --enable-rewrite --enable-suexec --enable-module=all --enable-mods-shared=all --enable-cache=shared --enable-file-cache=shared --enable-mem-cache=shared --enable-disk-cache=shared --enable-proxy=shared --enable-ssl=shared --enable-cgi=shared --enable-cgid=shared --enable-passenger=shared;make;make install;
@@ -33,13 +33,14 @@ RUN groupadd -g 600 mysql;useradd -g mysql -u 600 -d /home/mysql mysql;
 # RUN echo -e "\nsession    required     pam_limits.so\n" >> /etc/pam.d/login;
 
 # For Percona Server Install
-RUN cd /usr/local/src;wget http://www.percona.com/redir/downloads/Percona-Server-5.5/Percona-Server-5.5.29-29.4/binary/linux/x86_64/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;tar -zxf Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;mkdir -p /var/xtradb/tmp;mkdir -p /var/xtradb/files/qualia;mkdir -p /var/xtradb/logs/qualia;mkdir -p /var/xtradb/qualia;mkdir -p /usr/local/xtradb;mkdir -p /etc/xtradb/qualia;mv /usr/local/src/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64 /usr/local/xtradb/xtradb-5.5.29;chown -R mysql.mysql /var/xtradb /usr/local/xtradb /etc/xtradb;
+RUN cd /usr/local/src;wget http://www.percona.com/redir/downloads/Percona-Server-4.5/Percona-Server-5.5.29-29.4/binary/linux/x86_64/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;tar -zxf Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;mkdir -p /var/xtradb/tmp;mkdir -p /var/xtradb/files/qualia;mkdir -p /var/xtradb/logs/qualia;mkdir -p /var/xtradb/qualia;mkdir -p /usr/local/xtradb;mkdir -p /etc/xtradb/qualia;mkdir -p /var/lib/mysql;mv /usr/local/src/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64 /usr/local/xtradb/xtradb-5.5.29;chown -R mysql.mysql /var/xtradb /usr/local/xtradb /etc/xtradb /var/lib/mysql;
 
 # For MySQL Config
-ADD mysql_files/my.cnf /etc/xtradb/qualia
-ADD mysql_files/mysql.conn /etc/xtradb/qualia
-ADD mysql_files/mysql.server /etc/xtradb/qualia
+ADD mysql_files/my.cnf /etc/xtradb/qualia/my.cnf
+ADD mysql_files/mysql.conn /etc/xtradb/qualia/mysql.conn
+ADD mysql_files/mysql.server /etc/xtradb/qualia/mysql.server
 
-CMD /etc/xtradb/qualia/mysql.server start;
-CMD su - mysql;cd /usr/local/xtradb/xtradb-5.5.29;./scripts/mysql_install_db --datadir=/var/xtradb/qualia;
+CMD cd /usr/local/xtradb/xtradb-5.5.29;sudo -u mysql ./scripts/mysql_install_db --datadir=/var/xtradb/qualia;
+CMD sudo -u mysql /etc/xtradb/qualia/mysql.server start;
 
+CMD /usr/local/apache2/bin/apachectl start;
