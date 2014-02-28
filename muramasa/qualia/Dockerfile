@@ -23,8 +23,9 @@ RUN cd /usr/local/src;wget http://memcached.googlecode.com/files/memcached-1.4.1
 
 ## For DB
 
-# For create mysql user
+# For create user
 RUN groupadd -g 600 mysql;useradd -g mysql -u 600 -d /home/mysql mysql;
+RUN groupadd -g 700 www;useradd -g www -u 700 -d /home/www www;
 
 # For OS Setup
 # RUN echo -e "\n## For mysql direct-io\nvm.swappiness = 0\n" >> /etc/sysctl.conf;sysctl -p;
@@ -36,11 +37,23 @@ RUN groupadd -g 600 mysql;useradd -g mysql -u 600 -d /home/mysql mysql;
 RUN cd /usr/local/src;wget http://www.percona.com/redir/downloads/Percona-Server-5.5/Percona-Server-5.5.29-29.4/binary/linux/x86_64/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;tar -zxf Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;mkdir -p /var/xtradb/tmp;mkdir -p /var/xtradb/files/qualia;mkdir -p /var/xtradb/logs/qualia;mkdir -p /var/xtradb/qualia;mkdir -p /usr/local/xtradb;mkdir -p /etc/xtradb/qualia;mkdir -p /var/lib/mysql;mv /usr/local/src/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64 /usr/local/xtradb/xtradb-5.5.29;chown -R mysql.mysql /var/xtradb /usr/local/xtradb /etc/xtradb /var/lib/mysql;
 
 # For MySQL Config
-ADD mysql_files/my.cnf /etc/xtradb/qualia/my.cnf
-ADD mysql_files/mysql.conn /etc/xtradb/qualia/mysql.conn
-ADD mysql_files/mysql.server /etc/xtradb/qualia/mysql.server
+ADD files/mysql/my.cnf /etc/xtradb/qualia/my.cnf
+ADD files/mysql/mysql.conn /etc/xtradb/qualia/mysql.conn
+ADD files/mysql/mysql.server /etc/xtradb/qualia/mysql.server
+RUN chown mysql. /etc/xtradb/qualia/*
 
-CMD cd /usr/local/xtradb/xtradb-5.5.29;sudo -u mysql ./scripts/mysql_install_db --datadir=/var/xtradb/qualia;
-CMD sudo -u mysql /etc/xtradb/qualia/mysql.server start;
+# For Apache Config
+ADD files/apache/httpd.conf /usr/local/apache2/conf/httpd.conf
+ADD files/apache/server-status.conf /usr/local/apache2/conf/server-status.conf
+ADD files/apache/virtualdomain.conf /usr/local/apache2/conf/virtualdomain.conf
+RUN chown root. /usr/local/apache2/conf/*.conf
 
-CMD /usr/local/apache2/bin/apachectl start;
+# For sudo
+ADD files/sudo/sudoers /etc/sudoers
+RUN chown root. /etc/sudoers
+
+# For Shell
+ADD files/shell/start.sh /tmp/start.sh
+
+# Start Service
+CMD ["sh", "/tmp/start.sh"]
