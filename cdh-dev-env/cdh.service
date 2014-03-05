@@ -1,0 +1,12 @@
+[Unit]
+Description=CDH Service
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+RestartSec=10s
+ExecStart=/usr/bin/docker run -t -i -d -p 50070:50070 pdmp/cdh-pseudo-dist 
+
+[Install]
+WantedBy=local.target
