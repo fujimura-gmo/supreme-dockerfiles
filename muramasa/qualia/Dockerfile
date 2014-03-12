@@ -1,12 +1,19 @@
 FROM centos
 MAINTAINER Arata Fujimura
 
+# Timezone settings
 RUN echo 'LANG="ja_JP.UTF-8"' > /etc/sysconfig/i18n ;echo 'ZONE="Asia/Tokyo"' > /etc/sysconfig/clock ;cp -a /usr/share/zoneinfo/Asia/Tokyo /etc/localtime 
 
-## FOr Web
+# Add Epel repository
+RUN rpm --import http://ftp-srv2.kddilabs.jp/Linux/distributions/fedora/epel/RPM-GPG-KEY-EPEL-6
+RUN rpm -Uvh http://ftp-srv2.kddilabs.jp/Linux/distributions/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
 
-# For EPEL
-RUN cd /usr/local/src;wget http://ftp-srv2.kddilabs.jp/Linux/distributions/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm;rpm -ivh epel-release-6-8.noarch.rpm
+# Use fastest mirror first, with Japanese repositories
+RUN yum install -y yum-plugin-fastestmirror
+RUN echo "include_only=.jp" >> /etc/yum/pluginconf.d/fastestmirror.conf
+
+
+# For Web
 
 # For Package
 RUN yum groupinstall -y "Development Tools";yum --enablerepo=epel install -y zlib-devel openssl-devel libxml2-devel bzip2-devel curl-devel libpng-devel freetype-devel openldap-devel mysql-devel net-snmp-devel libxslt-devel libjpeg-devel libmcrypt-devel libevent-devel libmcrypt sudo libaio libaio-devel;
@@ -52,8 +59,12 @@ RUN chown root. /usr/local/apache2/conf/*.conf
 ADD files/sudo/sudoers /etc/sudoers
 RUN chown root. /etc/sudoers
 
-# For Shell
-ADD files/shell/start.sh /tmp/start.sh
+# For Supervisor
+RUN yum --enablerepo=epel install -y supervisor
+ADD files/supervisord/supervisord.conf /etc/supervisord.conf
 
-# Start Service
-CMD ["sh", "/tmp/start.sh"]
+# Start services
+
+EXPOSE 80 
+CMD ["/usr/bin/supervisord"]
+
