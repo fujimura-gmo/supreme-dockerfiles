@@ -1,7 +1,7 @@
 supreme-dockerfiles
 ===================
 
-至高のDockerfileです
+This is a Dockerfile of supreme.
 
 cdh-dev-env:
  - Contains vagrant, docker container for pseudo distributed CDH4 (on oracle jdk7). 
