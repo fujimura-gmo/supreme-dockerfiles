@@ -41,12 +41,14 @@ RUN groupadd -g 700 www;useradd -g www -u 700 -d /home/www www;
 # RUN echo -e "\nsession    required     pam_limits.so\n" >> /etc/pam.d/login;
 
 # For Percona Server Install
-RUN cd /usr/local/src;wget http://www.percona.com/redir/downloads/Percona-Server-5.5/Percona-Server-5.5.29-29.4/binary/linux/x86_64/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;tar -zxf Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;mkdir -p /var/xtradb/tmp;mkdir -p /var/xtradb/files/qualia;mkdir -p /var/xtradb/logs/qualia;mkdir -p /var/xtradb/qualia;mkdir -p /usr/local/xtradb;mkdir -p /etc/xtradb/qualia;mkdir -p /var/lib/mysql;mv /usr/local/src/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64 /usr/local/xtradb/xtradb-5.5.29;chown -R mysql.mysql /var/xtradb /usr/local/xtradb /etc/xtradb /var/lib/mysql;
+RUN cd /usr/local/src;wget http://www.percona.com/redir/downloads/Percona-Server-5.5/Percona-Server-5.5.29-29.4/binary/linux/x86_64/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;tar -zxf Percona-Server-5.5.29-rel29.4-401.Linux.x86_64.tar.gz;mkdir -p /var/xtradb/tmp;mkdir -p /var/xtradb/files/qualia;mkdir -p /var/xtradb/logs/qualia;mkdir -p /var/xtradb/qualia;mkdir -p /usr/local/xtradb;mkdir -p /etc/xtradb/qualia;mkdir -p /var/lib/mysql;mv /usr/local/src/Percona-Server-5.5.29-rel29.4-401.Linux.x86_64 /usr/local/xtradb/xtradb-5.5.29;chown -R mysql.mysql /var/xtradb /usr/local/xtradb /etc/xtradb /var/lib/mysql;rm -rf /usr/local/xtradb/xtradb-5.5.29/data;
 
 # For MySQL Config
 ADD files/mysql/my.cnf /etc/xtradb/qualia/my.cnf
 ADD files/mysql/mysql.conn /etc/xtradb/qualia/mysql.conn
 ADD files/mysql/mysql.server /etc/xtradb/qualia/mysql.server
+RUN chmod 600 /etc/xtradb/qualia/my.cnf
+RUN mv /etc/my.cnf /etc/_my.cnf
 RUN chown mysql. /etc/xtradb/qualia/*
 
 # For Apache Config
@@ -58,6 +60,7 @@ RUN chown root. /usr/local/apache2/conf/*.conf
 # For sudo
 ADD files/sudo/sudoers /etc/sudoers
 RUN chown root. /etc/sudoers
+RUN chmod 0440 /etc/sudoers
 
 # For Supervisor
 RUN yum --enablerepo=epel install -y supervisor
